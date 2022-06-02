@@ -6,6 +6,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import 'chat_massage.dart';
+
 class ChatScreen extends StatefulWidget {
   const ChatScreen({Key? key}) : super(key: key);
 
@@ -18,12 +20,15 @@ class _ChatScreenState extends State<ChatScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   // ignore: prefer_typing_uninitialized_variables
   var _currentuser;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     FirebaseAuth.instance.authStateChanges().listen((user) {
-      _currentuser = user;
+      setState(() {
+        _currentuser = user;
+      });
     });
   }
 
@@ -49,32 +54,41 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _sendMassage({String? text, File? imgFile}) async {
     var user = await _getUser();
-    if (user == null) {
+    /* if (user == null) {
       _scaffoldKey.currentState!.showSnackBar(
         const SnackBar(
           content: Text('Não foi possivel fazer o login'),
           backgroundColor: Colors.red,
         ),
       );
-      print("erro ao logar ");
-    }
+      //print("erro ao logar ");
+    }*/
     Map<String, dynamic> data = {
       "uid": user.uid,
-      //"text": user.text,
-      //"imgUrl": user.imgUrl,
+      "senderName": user.displayName,
+      "time": Timestamp.now(),
+      //"senderPhotoUrl": user.photoUrl,
     };
 
     if (imgFile != null) {
       UploadTask task = FirebaseStorage.instance
           .ref()
-          .child(Duration.microsecondsPerMillisecond.toString())
+          .child(user.uid + Duration.microsecondsPerMillisecond.toString())
           .putFile(imgFile);
+
+      setState(() {
+        _isLoading = true;
+      });
 
       TaskSnapshot taskSnapshot = await task.whenComplete(() => null);
       String url = await taskSnapshot.ref.getDownloadURL();
       data['imgUrl'] = url;
+
+      setState(() {
+        _isLoading = false;
+      });
     }
-    print("$text antes de mandar para o banco");
+    //print("$text antes de mandar para o banco");
     if (text != null) data['text'] = text;
 
     FirebaseFirestore.instance.collection('messagers').add(data);
@@ -85,8 +99,24 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text("Olá"),
+        title: Text(_currentuser != null
+            ? 'Olá, ${_currentuser.displayName}'
+            : 'Chat App'),
         elevation: 0,
+        actions: [
+          _currentuser != null
+              ? IconButton(
+                  onPressed: () {
+                    FirebaseAuth.instance.signOut();
+                    googleSignIn.signOut();
+                    const SnackBar(
+                      content: Text('Usuario Deslogado com Sucesso'),
+                      backgroundColor: Colors.red,
+                    );
+                  },
+                  icon: const Icon(Icons.exit_to_app))
+              : Container()
+        ],
       ),
       body: Column(
         children: [
@@ -94,6 +124,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('messagers')
+                  .orderBy('time')
                   .snapshots(),
               builder: (context, snapshot) {
                 switch (snapshot.connectionState) {
@@ -101,19 +132,23 @@ class _ChatScreenState extends State<ChatScreen> {
                   case ConnectionState.waiting:
                     return const CircularProgressIndicator();
                   default:
-                    List<DocumentSnapshot> documents = snapshot.data!.docs;
+                    List<DocumentSnapshot> documents =
+                        snapshot.data!.docs.toList();
                     return ListView.builder(
                       itemCount: documents.length,
-                      reverse: true,
+                      reverse: // controla se a conversa começa de cima para baixo ou vise versa.
+                          true,
                       itemBuilder: (context, index) {
-                        return ListTile(
-                            title: Text(documents[index]['text'].toString()));
+                        return ChatMassage(
+                            data: documents[index].data(),
+                            mine: documents[index]['uid'] == _currentuser?.uid);
                       },
                     );
                 }
               },
             ),
           ),
+          _isLoading ? const LinearProgressIndicator() : Container(),
           TextComposer(sendMassager: _sendMassage),
         ],
       ),
