@@ -14,6 +14,9 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  // ignore: prefer_typing_uninitialized_variables
   var _currentuser;
 
   @override
@@ -23,8 +26,6 @@ class _ChatScreenState extends State<ChatScreen> {
       _currentuser = user;
     });
   }
-
-  final GoogleSignIn googleSignIn = GoogleSignIn();
 
   Future _getUser() async {
     if (_currentuser != null) return _currentuser;
@@ -47,27 +48,42 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _sendMassage({String? text, File? imgFile}) async {
-    Map<String, dynamic> data = {};
+    var user = await _getUser();
+    if (user == null) {
+      _scaffoldKey.currentState!.showSnackBar(
+        const SnackBar(
+          content: Text('Não foi possivel fazer o login'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      print("erro ao logar ");
+    }
+    Map<String, dynamic> data = {
+      "uid": user.uid,
+      //"text": user.text,
+      //"imgUrl": user.imgUrl,
+    };
 
     if (imgFile != null) {
       UploadTask task = FirebaseStorage.instance
           .ref()
-          .child(TimeOfDay.now().minute.toString())
+          .child(Duration.microsecondsPerMillisecond.toString())
           .putFile(imgFile);
 
       TaskSnapshot taskSnapshot = await task.whenComplete(() => null);
       String url = await taskSnapshot.ref.getDownloadURL();
       data['imgUrl'] = url;
     }
-
+    print("$text antes de mandar para o banco");
     if (text != null) data['text'] = text;
 
-    FirebaseFirestore.instance.collection("messagers").add(data);
+    FirebaseFirestore.instance.collection('messagers').add(data);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: const Text("Olá"),
         elevation: 0,
@@ -77,7 +93,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
-                  .collection("messagers")
+                  .collection('messagers')
                   .snapshots(),
               builder: (context, snapshot) {
                 switch (snapshot.connectionState) {
@@ -85,15 +101,15 @@ class _ChatScreenState extends State<ChatScreen> {
                   case ConnectionState.waiting:
                     return const CircularProgressIndicator();
                   default:
-                    List<DocumentSnapshot> documents =
-                        snapshot.data!.docs.reversed.toList();
+                    List<DocumentSnapshot> documents = snapshot.data!.docs;
                     return ListView.builder(
-                        itemCount: documents.length,
-                        reverse: true,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                              title: Text(documents[index].data['text']));
-                        });
+                      itemCount: documents.length,
+                      reverse: true,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                            title: Text(documents[index]['text'].toString()));
+                      },
+                    );
                 }
               },
             ),
