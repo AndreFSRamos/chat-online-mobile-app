@@ -28,7 +28,8 @@ class _TextComposerState extends State<TextComposer> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
+      color: Colors.deepPurple,
+      //margin: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
         children: [
           IconButton(
@@ -49,6 +50,7 @@ class _TextComposerState extends State<TextComposer> {
           Expanded(
             child: TextField(
               controller: controller,
+
               decoration: const InputDecoration.collapsed(
                   hintText: "Enviar uma messagem"),
               //função onChange do texxField, troca a varial _isComposing
@@ -68,6 +70,11 @@ class _TextComposerState extends State<TextComposer> {
                 widget.sendMassager(text: text);
                 _reset();
               },
+              cursorColor: Colors.white,
+              style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600),
             ),
           ),
           IconButton(

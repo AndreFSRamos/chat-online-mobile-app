@@ -83,11 +83,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
     //Armazendo as informações do usuario logado, (Id, Nome e hora do envio).
     //OBS: HORA NO ENVIO SERVE PARA ORDENAR A LISTA DE MENSSAGEM.
+
+    //String url = user.PhotoUrl;
     Map<String, dynamic> data = {
       "uid": user.uid,
       "senderName": user.displayName,
       "time": Timestamp.now(),
-      //"senderPhotoUrl": user.photoUrl,
+      "senderPhotoUrl": user.photoURL,
     };
 
     //Verifica se o usuário enviou uma imagem, caso sim, envia para o banco.
@@ -128,15 +130,17 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[900],
       key: _scaffoldKey,
       //I============ Inicio da AppBar =====================
       appBar: AppBar(
+        backgroundColor: Colors.deepPurple,
         //Texto da AppBar, se o usuario estiver logado, ira contanenar "Ola, " +
         //o nome do usuario, caso contrario exibirar "Chat App"
         title: Text(_currentuser != null
             ? 'Olá, ${_currentuser.displayName}'
             : 'Chat App'),
-        elevation: 0,
+        elevation: 20,
         //Action da AppBar, aqui é verificado de o usuario está logado, caso SIM
         //ira exibir o botão de logout. Caso contrario, a actions retorna um
         //container vazio, para não exibir nada.
@@ -177,11 +181,11 @@ class _ChatScreenState extends State<ChatScreen> {
                   //widget CircularProgress para inciar a espera para o usuario.
                   case ConnectionState.none:
                   case ConnectionState.waiting:
-                    return const CircularProgressIndicator();
+                    return const Center(child: CircularProgressIndicator());
                   default:
                     //Recuperando informarções da coleção e armazenando um uma List.
                     List<DocumentSnapshot> documents =
-                        snapshot.data!.docs.toList();
+                        snapshot.data!.docs.reversed.toList();
                     return ListView.builder(
                       itemCount: documents
                           .length, //recebendo o tamanho da lista como count.
