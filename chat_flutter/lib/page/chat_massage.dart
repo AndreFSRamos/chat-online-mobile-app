@@ -1,10 +1,17 @@
 // ignore_for_file: prefer_typing_uninitialized_variables
+
+// CLasse responsavel por criar os card de mensagem enviadas, controla o lado
+//que é exibio CARD e seus componente de acordo variavel "mine", sera serivicado
+// se é verdadeiro ou falso que o usuario ela logado, caso esteja a o card da mensagem
+//ira paracer no lado direito, caso contrario ira paracer ao lado esquerto, para
+//que acha um destque de quem é o usuario principal.
 import 'package:flutter/material.dart';
 
 class ChatMassage extends StatelessWidget {
   const ChatMassage({Key? key, required this.data, required this.mine})
       : super(key: key);
 
+//Recebe um DocumentSnapShot e variavel Booleana por parametro.
   final data;
   final bool mine;
 

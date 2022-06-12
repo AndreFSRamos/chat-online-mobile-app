@@ -184,13 +184,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     return const Center(child: CircularProgressIndicator());
                   default:
                     //Recuperando informarções da coleção e armazenando um uma List.
-                    List<DocumentSnapshot> documents =
-                        snapshot.data!.docs.reversed.toList();
+                    List<DocumentSnapshot> documents = snapshot
+                        .data!.docs.reversed
+                        .toList(); // a TAG RESERSED controla se a conversa começa de cima para baixo ou vise versa.
                     return ListView.builder(
                       itemCount: documents
                           .length, //recebendo o tamanho da lista como count.
-                      reverse: // controla se a conversa começa de cima para baixo ou vise versa.
-                          true,
+                      reverse: true,
                       itemBuilder: (context, index) {
                         //Chamando o widget ChatMassage para cara item da lista,
                         //e passando por parametro as informações do item, e se
