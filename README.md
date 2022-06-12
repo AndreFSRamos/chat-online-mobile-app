@@ -2,7 +2,7 @@
 
 ## Descrição.
 
-<p>O aplicativo foi desenvovido com a finalidade de estabelecer um chat online com o envico de mensagens de texto e imagens, utilizandoo DB FireStore Database do Firebase, e o login do usuario atraves da autenticação da conta google.</p>
+<p>O aplicativo foi desenvolvido com a finalidade de estabelecer um chat online com o envio de mensagens de texto e imagens, utilizandoo DB FireStore Database do Firebase, e o login do usuário através da autenticação da conta google..</p>
 
 ## Tecnologias.
 #### Linguagem : dart.
