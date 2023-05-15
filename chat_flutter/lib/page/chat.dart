@@ -73,12 +73,12 @@ class _ChatScreenState extends State<ChatScreen> {
     //no formata de snack bar.
     if (user == null) {
       // ignore: deprecated_member_use
-      _scaffoldKey.currentState!.showSnackBar(
+     /*  _scaffoldKey.currentState!.showSnackBar(
         const SnackBar(
           content: Text('Não foi possivel fazer o login'),
           backgroundColor: Colors.red,
         ),
-      );
+      ); */
     }
 
     //Armazendo as informações do usuario logado, (Id, Nome e hora do envio).
